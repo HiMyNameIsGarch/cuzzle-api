@@ -1,4 +1,14 @@
+var MyAllowSpecificationOrigins = "_myAllowSpecificationOrigins";
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options => 
+{
+    options.AddPolicy(name: MyAllowSpecificationOrigins, builder =>
+        {
+            builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod();
+        });
+});
 
 // Add services to the container.
 
@@ -17,6 +27,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(MyAllowSpecificationOrigins);
 
 app.UseAuthorization();
 
