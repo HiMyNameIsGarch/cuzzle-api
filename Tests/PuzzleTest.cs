@@ -4,7 +4,7 @@ using System;
 
 namespace Tests;
 
-public class UnitTest1
+public class PuzzleTest
 {
     private readonly PuzzleVM puzzle = new PuzzleVM("Hard", "my puzzle", "a description");
 
@@ -17,10 +17,10 @@ public class UnitTest1
         Puzzle created = ps.AddPuzzle(puzzle);
 
         // assert
-        Assert.True(created.id != Guid.Empty);
+        Assert.True(created.Id != Guid.Empty);
         
         // clean up
-        ps.DeletePuzzle(created.id);
+        ps.DeletePuzzle(created.Id);
     }
 
     [Fact]
@@ -36,7 +36,7 @@ public class UnitTest1
         Assert.True(puzzles.Count() > 0);
 
         //clean up
-        ps.DeletePuzzle(created.id);
+        ps.DeletePuzzle(created.Id);
     }
 
     [Theory]
@@ -59,8 +59,8 @@ public class UnitTest1
     {
         // arrange
         Puzzle created = ps.AddPuzzle(puzzle);
-        puzzle.id = created.id;
-        puzzle.name = "Updated puzzle";
+        puzzle.Id = created.Id;
+        puzzle.Name = "Updated puzzle";
 
         // act
         bool updated = ps.UpdatePuzzle(puzzle);
@@ -69,7 +69,7 @@ public class UnitTest1
         Assert.True(updated);
 
         // clean up
-        ps.DeletePuzzle(puzzle.id);
+        ps.DeletePuzzle(puzzle.Id);
     }
 
     [Theory]
@@ -79,8 +79,8 @@ public class UnitTest1
     {
         // arrange
         var guid = Guid.Parse(id);
-        puzzle.id = guid;
-        puzzle.name = "updated puzzle";
+        puzzle.Id = guid;
+        puzzle.Name = "updated puzzle";
 
         // act
         var updated = ps.UpdatePuzzle(puzzle);

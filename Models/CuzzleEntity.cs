@@ -53,7 +53,7 @@ internal class CuzzleEntity
         if(dr is null) return new T();
         if(!dr.HasRows) return new T();
 
-        T obj = Helper.ConvertToObject<T>(dr);
+        T obj = Mapper.ConvertToObject<T>(dr);
         cmd.Connection.Close();
         return obj;
     }
@@ -73,7 +73,7 @@ internal class CuzzleEntity
             Console.WriteLine("We could not get the list of " + new T().ToString());
             Console.WriteLine(ex.Message);
         }
-        IEnumerable<T> objects = Helper.ConvertToObjectList<T>(dr);
+        IEnumerable<T> objects = Mapper.ConvertToObjectList<T>(dr);
         cmd.Connection.Close();
         return objects;
     }

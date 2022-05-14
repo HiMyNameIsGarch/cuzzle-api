@@ -28,7 +28,7 @@ public class PuzzleController : ControllerBase
     public IActionResult GetById(Guid id)
     {
         var puzzle = ps.GetPuzzle(id);
-        if(puzzle.id == Guid.Empty) return BadRequest("We could not get puzzle");
+        if(puzzle.Id == Guid.Empty) return BadRequest("We could not get puzzle");
 
         return Ok(puzzle);
     }
@@ -36,11 +36,11 @@ public class PuzzleController : ControllerBase
     [HttpPost]
     public IActionResult Add([FromBody] PuzzleVM puzzleToAdd)
     {
-        puzzleToAdd.id = Guid.Empty;
-        puzzleToAdd.solution_id = Guid.Empty;
+        puzzleToAdd.Id = Guid.Empty;
+        puzzleToAdd.SolutionId = Guid.Empty;
 
         var puzzle = ps.AddPuzzle(puzzleToAdd);
-        if(puzzle.id == Guid.Empty) return BadRequest("We could not create puzzle");
+        if(puzzle.Id == Guid.Empty) return BadRequest("We could not create puzzle");
 
         return Ok(puzzle);
     }

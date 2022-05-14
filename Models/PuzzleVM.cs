@@ -1,18 +1,18 @@
 public class PuzzleVM
 {
-    public Guid id { get; set; }
-    public Guid solution_id { get; set; }
-    public Guid account_id { get; set; }
-    public string name { get; set; }
-    public string question { get; set; }
-    public string flag { get; set; }
-    public bool allow_anonymous { get; set; }
-    public bool is_published { get; set; }
+    public Guid Id { get; set; }
+    public Guid SolutionId { get; set; }
+    public Guid AccountId { get; set; }
+    public string Name { get; set; }
+    public string Question { get; set; }
+    public string Flag { get; set; }
+    public bool AllowAnonymous { get; set; }
+    public bool IsPublished { get; set; }
 
     public PuzzleVM(string flag, string name, string question)
     {
-        this.flag = flag;
-        this.name = name;
-        this.question = question;
+        this.Flag = flag;
+        this.Name = name;
+        this.Question = question;
     }
 }

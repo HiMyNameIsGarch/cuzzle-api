@@ -34,9 +34,9 @@ public class PuzzleService
         NpgsqlCommand cmd = new NpgsqlCommand();
         cmd.CommandText = "INSERT INTO puzzle(account_id, name, question, flag) VALUES(@account_id::UUID, @name, @question, @flag) RETURNING *;";
         cmd.Parameters.AddWithValue("account_id", "98b78eae-e872-4097-8415-5ac4fb68fd0b");
-        cmd.Parameters.AddWithValue("name", puzzleToAdd.name);
-        cmd.Parameters.AddWithValue("question", puzzleToAdd.question);
-        cmd.Parameters.AddWithValue("flag", puzzleToAdd.flag);
+        cmd.Parameters.AddWithValue("name", puzzleToAdd.Name);
+        cmd.Parameters.AddWithValue("question", puzzleToAdd.Question);
+        cmd.Parameters.AddWithValue("flag", puzzleToAdd.Flag);
 
         var puzzle = _db.GetObject<Puzzle>(cmd);
         return puzzle;
@@ -46,10 +46,10 @@ public class PuzzleService
     {
         NpgsqlCommand cmd = new NpgsqlCommand();
         cmd.CommandText = "UPDATE puzzle SET name = @name, question = @question, flag = @flag WHERE id = @id::UUID;";
-        cmd.Parameters.AddWithValue("id", puzzleToUpdate.id);
-        cmd.Parameters.AddWithValue("name", puzzleToUpdate.name);
-        cmd.Parameters.AddWithValue("question", puzzleToUpdate.question);
-        cmd.Parameters.AddWithValue("flag", puzzleToUpdate.flag);
+        cmd.Parameters.AddWithValue("id", puzzleToUpdate.Id);
+        cmd.Parameters.AddWithValue("name", puzzleToUpdate.Name);
+        cmd.Parameters.AddWithValue("question", puzzleToUpdate.Question);
+        cmd.Parameters.AddWithValue("flag", puzzleToUpdate.Flag);
 
         var updated = _db.ExecuteQuery(cmd);
         return updated;
