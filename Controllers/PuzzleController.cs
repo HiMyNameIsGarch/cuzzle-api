@@ -1,27 +1,65 @@
 using Microsoft.AspNetCore.Mvc;
-using cuzzle_api.Models;
 
 namespace cuzzle_api.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/puzzle")]
 public class PuzzleController : ControllerBase
 {
     private readonly ILogger<PuzzleController> _logger;
 
-    private readonly CuzzleEntity db = new CuzzleEntity();
+    private readonly PuzzleService ps;
 
     public PuzzleController(ILogger<PuzzleController> logger)
     {
+        ps = new PuzzleService();
         _logger = logger;
     }
 
-    [HttpGet(Name = "GetPuzzle")]
-    public Puzzle Get()
+    [HttpGet]
+    public IActionResult GetAll()
     {
-        _logger.Log(LogLevel.Information, "trying to get data from db");
-        var data = db.GetData("select * from puzzle limit 1;");
-        _logger.Log(LogLevel.Information, "You data is: {0}", data);
-        return data;
+        var puzzles = ps.GetPuzzleList();
+
+        return Ok(puzzles);
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetById(Guid id)
+    {
+        var puzzle = ps.GetPuzzle(id);
+        if(puzzle.id == Guid.Empty) return BadRequest("We could not get puzzle");
+
+        return Ok(puzzle);
+    }
+
+    [HttpPost]
+    public IActionResult Add([FromBody] PuzzleVM puzzleToAdd)
+    {
+        puzzleToAdd.id = Guid.Empty;
+        puzzleToAdd.solution_id = Guid.Empty;
+
+        var puzzle = ps.AddPuzzle(puzzleToAdd);
+        if(puzzle.id == Guid.Empty) return BadRequest("We could not create puzzle");
+
+        return Ok(puzzle);
+    }
+
+    [HttpPut]
+    public IActionResult Update([FromBody] PuzzleVM puzzleToUpdate)
+    {
+        var updated = ps.UpdatePuzzle(puzzleToUpdate);
+        if(!updated) return BadRequest("We could not update puzzle");
+
+        return Ok();
+    }
+
+    [HttpDelete]
+    public IActionResult Delete(Guid id)
+    {
+        var deleted = ps.DeletePuzzle(id);
+        if(!deleted) return BadRequest("We could not delete puzzle!");
+
+        return Ok();
     }
 }
