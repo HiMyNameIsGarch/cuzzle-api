@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace cuzzle_api.Controllers;
@@ -16,6 +17,7 @@ public class PuzzleController : ControllerBase
         _logger = logger;
     }
 
+    [Authorize] // test purpose
     [HttpGet]
     public IActionResult GetAll()
     {
