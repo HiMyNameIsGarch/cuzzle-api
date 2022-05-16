@@ -8,13 +8,14 @@ namespace cuzzle_api.Controllers;
 public class PuzzleController : ControllerBase
 {
     private readonly ILogger<PuzzleController> _logger;
-
+    private readonly IUserService _userService;
     private readonly PuzzleService ps;
 
-    public PuzzleController(ILogger<PuzzleController> logger)
+    public PuzzleController(ILogger<PuzzleController> logger, IUserService userService)
     {
         ps = new PuzzleService();
         _logger = logger;
+        _userService = userService;
     }
 
     [Authorize] // test purpose
