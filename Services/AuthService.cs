@@ -1,9 +1,5 @@
 using cuzzle_api.Models;
 using Npgsql;
-using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using System.IdentityModel.Tokens.Jwt;
 
 public class AuthService
 {
@@ -39,27 +35,14 @@ public class AuthService
         return id;
     }
 
-    public string GenerateToken(Guid id, IConfiguration config)
+    public UserToken GetUserToken(Guid id)
     {
-        List<Claim> claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Sid, id.ToString())
-        };
+        NpgsqlCommand cmd = new NpgsqlCommand();
+        cmd.CommandText = "SELECT id, refresh_token, refresh_token_expire_date FROM account WHERE id = @id;";
+        cmd.Parameters.AddWithValue("id", id);
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                    config.GetSection("Jwt:Key").Value));
-
-        var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-        var token = new JwtSecurityToken(
-                issuer: config.GetSection("Jwt:Issuer").Value,
-                audience: config.GetSection("Jwt:Audience").Value,
-                claims: claims, 
-                expires: DateTime.Now.AddMinutes(15),
-                signingCredentials: cred);
-
-        string jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-        return jwt;
+        UserToken user = _db.GetObject<UserToken>(cmd);
+        user.RefreshToken = user.RefreshToken.Trim();
+        return user;
     }
 }
