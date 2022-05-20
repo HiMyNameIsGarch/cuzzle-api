@@ -1,9 +1,7 @@
-using System.Buffers.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json.Nodes;
 using cuzzle_api.Models;
 using cuzzle_api.Services;
 using Microsoft.IdentityModel.Tokens;
@@ -95,7 +93,7 @@ public class TokenService: ITokenService
 
     private string GetRandomToken()
     {
-        string token= string.Empty;
+        string token = string.Empty;
         var randomNumber = new byte[64];
         using (var rng = RandomNumberGenerator.Create())
         {

@@ -26,6 +26,8 @@ public class AuthController: ControllerBase
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserLogin userLogin)
     {
+        if(auth.UserExists(userLogin)) return BadRequest("User already exists! Try loggin in instead!");
+
         bool registered = auth.Register(userLogin);
         if(registered) return Ok();
         return BadRequest("We could not register the user.");
@@ -35,8 +37,10 @@ public class AuthController: ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] UserLogin user)
     {
+        if(!auth.UserExists(user)) return BadRequest("User does not exists! Try to register first!");
+
         Guid id = auth.Authenticate(user);
-        if(id == Guid.Empty) return NotFound("User not found!");
+        if(id == Guid.Empty) return BadRequest("Incorrect password!");
 
         var token = _token.GenerateAccessToken(id);
         var refreshToken = _token.GeneretateRefreshToken(id);

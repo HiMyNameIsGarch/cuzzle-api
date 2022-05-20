@@ -13,7 +13,7 @@ internal class CuzzleEntity
         _connection = new NpgsqlConnection(CONNECTION_STRING);
     }
 
-    public object GetScalar(NpgsqlCommand cmd)
+    public T? GetScalar<T>(NpgsqlCommand cmd)
     {
         cmd.Connection = _connection;
         object? result = null;
@@ -29,8 +29,8 @@ internal class CuzzleEntity
         }
         cmd.Connection.Close();
 
-        if(result is not null) return result;
-        return new object();
+        if(result is not null) return (T)result;
+        return default(T);
     }
 
     public T GetObject<T>(NpgsqlCommand cmd) where T : class, new()
@@ -77,6 +77,7 @@ internal class CuzzleEntity
         cmd.Connection.Close();
         return objects;
     }
+
     internal bool ExecuteQuery(NpgsqlCommand cmd)
     {
         cmd.Connection = _connection;
@@ -94,7 +95,6 @@ internal class CuzzleEntity
             return false;
         }
         cmd.Connection.Close();
-
         return numRows == 1;
     }
 }
