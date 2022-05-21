@@ -58,7 +58,7 @@ public class TokenService: ITokenService
                 issuer: _config.GetSection("Jwt:Issuer").Value,
                 audience: _config.GetSection("Jwt:Audience").Value,
                 claims: claims, 
-                expires: DateTime.Now.AddMinutes(1),
+                expires: DateTime.Now.AddMinutes(_config.GetValue<double>("Jwt:AccessExpireTime")),
                 signingCredentials: cred);
 
         string jwt = new JwtSecurityTokenHandler().WriteToken(token);
@@ -72,7 +72,7 @@ public class TokenService: ITokenService
         var token = new RefreshToken
         {
             Token = GetRandomToken(),
-            Expires = DateTime.Now.AddDays(30),
+            Expires = DateTime.Now.AddDays(_config.GetValue<double>("Jwt:RefreshExpireTime")),
             Created = DateTime.Now
         };
         // return it
