@@ -85,10 +85,24 @@ public class TokenService: ITokenService
         NpgsqlCommand cmd = new NpgsqlCommand();
         cmd.CommandText = "UPDATE account SET refresh_token = @refresh_token, refresh_token_expire_date = @refresh_token_expire_date WHERE id = @id::UUID;";
         cmd.Parameters.AddWithValue("id", id);
-        cmd.Parameters.AddWithValue("refresh_token", token.Token);
+
+        byte[] hashedToken = HashToken(token.Token);
+        cmd.Parameters.AddWithValue("refresh_token", hashedToken);
         cmd.Parameters.AddWithValue("refresh_token_expire_date", token.Expires);
 
         return _db.ExecuteQuery(cmd);
+    }
+
+    // TODO: Move this function into a proper class
+    private byte[] HashToken(string token)
+    {
+        byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+        byte[] hash = new byte[32];
+        using(SHA256 sha = SHA256.Create())
+        {
+            hash = sha.ComputeHash(tokenBytes);
+        }
+        return hash;
     }
 
     private string GetRandomToken()

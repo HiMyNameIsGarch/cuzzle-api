@@ -31,11 +31,11 @@ public class TokenController: ControllerBase
         if(!Guid.TryParse(userId, out Guid goodUserId)) 
             return Unauthorized("Invalid Sid claim!");
 
-        // get user form db
+        // get user from db
         var user = auth.GetUserToken(goodUserId);
-        // check validity
-        if(user.Id == Guid.Empty || !user.RefreshToken.Equals(model.RefreshToken) || user.RefreshTokenExpireDate <= DateTime.Now)
-            return Unauthorized("Invalid Token!");
+        // Check token
+        if(!auth.CheckIfTokensMatch(model.RefreshToken, user) || user.Id == Guid.Empty)
+            return Unauthorized("Invalid Refresh Token!");
 
         // generate new tokens
         var token = _tokenService.GenerateAccessToken(goodUserId);

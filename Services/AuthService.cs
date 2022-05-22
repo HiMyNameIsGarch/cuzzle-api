@@ -2,6 +2,7 @@ using cuzzle_api.Models;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Npgsql;
 using System.Security.Cryptography;
+using System.Text;
 
 public class AuthService
 {
@@ -81,6 +82,27 @@ public class AuthService
         return pass.SequenceEqual(passwordDb);
     }
 
+    // TODO: Move this function into a proper class
+    private byte[] HashToken(string token)
+    {
+        byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
+        byte[] hash = new byte[32];
+        using(SHA256 sha = SHA256.Create())
+        {
+            hash = sha.ComputeHash(tokenBytes);
+        }
+        return hash;
+    }
+
+    public bool CheckIfTokensMatch(string userToken, UserToken dbToken)
+    {
+        if(dbToken.RefreshTokenExpireDate < DateTime.Now) return false;
+
+        byte[] hashedToken = HashToken(userToken);
+
+        return hashedToken.SequenceEqual(dbToken.RefreshToken);
+    }
+
     public UserToken GetUserToken(Guid id)
     {
         NpgsqlCommand cmd = new NpgsqlCommand();
@@ -88,7 +110,6 @@ public class AuthService
         cmd.Parameters.AddWithValue("id", id);
 
         UserToken user = _db.GetObject<UserToken>(cmd);
-        user.RefreshToken = user.RefreshToken.Trim();
         return user;
     }
 }
