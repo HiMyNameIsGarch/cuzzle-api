@@ -1,8 +1,9 @@
-using cuzzle_api.Services;
+using cuzzle_api.Services.TokenService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using cuzzle_api.Models;
 using System.Security.Claims;
+using cuzzle_api.Services.AuthService;
 
 namespace cuzzle_api.Controllers;
 
@@ -12,11 +13,11 @@ public class TokenController: ControllerBase
 {
     private readonly ILogger<TokenController> _logger;
     private readonly ITokenService _tokenService;
-    private readonly AuthService auth;
+    private readonly IAuthService _auth;
 
-    public TokenController(ILogger<TokenController> logger, ITokenService tokenService)
+    public TokenController(ILogger<TokenController> logger, ITokenService tokenService, IAuthService auth)
     {
-        auth = new AuthService();
+        _auth = auth;
         _logger = logger;
         _tokenService = tokenService;
     }
@@ -32,9 +33,9 @@ public class TokenController: ControllerBase
             return Unauthorized("Invalid Sid claim!");
 
         // get user from db
-        var user = auth.GetUserToken(goodUserId);
+        var user = _auth.GetUserToken(goodUserId);
         // Check token
-        if(!auth.CheckIfTokensMatch(model.RefreshToken, user) || user.Id == Guid.Empty)
+        if(!_auth.CheckIfTokensMatch(model.RefreshToken, user) || user.Id == Guid.Empty)
             return Unauthorized("Invalid Refresh Token!");
 
         // generate new tokens

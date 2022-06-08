@@ -2,10 +2,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using cuzzle_api.Models;
-using cuzzle_api.Services;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+
+namespace cuzzle_api.Services.TokenService;
 
 public class TokenService: ITokenService
 {
@@ -13,12 +13,12 @@ public class TokenService: ITokenService
 
     private readonly IConfiguration _config;
 
-    private readonly CuzzleEntity _db;
+    private readonly IDbService _db;
 
-    public TokenService(IConfiguration config)
+    public TokenService(IConfiguration config, IDbService db)
     {
         _config = config;
-        _db = new CuzzleEntity();
+        _db = db;
     }
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)

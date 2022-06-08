@@ -1,6 +1,8 @@
 using Xunit;
 using System.Linq;
 using System;
+using cuzzle_api.Models;
+using cuzzle_api.Services.PuzzleService;
 
 namespace Tests;
 
@@ -8,7 +10,7 @@ public class PuzzleTest
 {
     private readonly PuzzleVM puzzle = new PuzzleVM("Hard", "my puzzle", "a description");
 
-    private readonly PuzzleService ps = new PuzzleService();
+    private readonly PuzzleService ps = new PuzzleService(new CuzzleEntity());
 
     [Fact]
     public void ShouldAddPuzzleAndDeleteIt()

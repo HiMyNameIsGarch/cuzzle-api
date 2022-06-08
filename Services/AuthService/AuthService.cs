@@ -4,13 +4,15 @@ using Npgsql;
 using System.Security.Cryptography;
 using System.Text;
 
-public class AuthService
-{
-    private readonly CuzzleEntity _db;
+namespace cuzzle_api.Services.AuthService;
 
-    public AuthService()
+public class AuthService: IAuthService
+{
+    private readonly IDbService _db;
+
+    public AuthService(IDbService db)
     {
-        _db = new CuzzleEntity();
+        _db = db;
     }
 
     private byte[] GenerateSalt()

@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace cuzzle_api.Services;
+namespace cuzzle_api.Services.TokenService;
 
 public interface ITokenService
 {

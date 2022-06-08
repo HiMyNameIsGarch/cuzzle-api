@@ -1,13 +1,14 @@
-using cuzzle_api.Models;
 using Npgsql;
 
-public class PuzzleService 
-{
-    private readonly CuzzleEntity _db;
+namespace cuzzle_api.Services.PuzzleService;
 
-    public PuzzleService()
+public class PuzzleService: IPuzzleService
+{
+    private readonly IDbService _db;
+
+    public PuzzleService(IDbService db)
     {
-        _db = new CuzzleEntity();
+        _db = db;
     }
 
     public Puzzle GetPuzzle(Guid id)

@@ -1,6 +1,8 @@
 using cuzzle_api.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using cuzzle_api.Services.AuthService;
+using cuzzle_api.Services.TokenService;
 
 namespace cuzzle_api.Controllers;
 
@@ -10,14 +12,14 @@ public class AuthController: ControllerBase
 {
     private readonly ILogger<AuthController> _logger;
 
-    private readonly AuthService auth;
-    private readonly TokenService _token;
+    private readonly IAuthService _auth;
+    private readonly ITokenService _token;
     private readonly IConfiguration _config;
 
-    public AuthController(ILogger<AuthController> logger, IConfiguration config)
+    public AuthController(ILogger<AuthController> logger, IConfiguration config, IAuthService auth, ITokenService token)
     {
-        auth = new AuthService();
-        _token = new TokenService(config);
+        _auth = auth;
+        _token = token;
         _logger = logger;
         _config = config;
     }
@@ -26,9 +28,9 @@ public class AuthController: ControllerBase
     [HttpPost("register")]
     public IActionResult Register([FromBody] UserLogin userLogin)
     {
-        if(auth.UserExists(userLogin)) return BadRequest("User already exists! Try loggin in instead!");
+        if(_auth.UserExists(userLogin)) return BadRequest("User already exists! Try loggin in instead!");
 
-        bool registered = auth.Register(userLogin);
+        bool registered = _auth.Register(userLogin);
         if(registered) return Ok();
         return BadRequest("We could not register the user.");
     }
@@ -37,9 +39,9 @@ public class AuthController: ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] UserLogin user)
     {
-        if(!auth.UserExists(user)) return BadRequest("User does not exists! Try to register first!");
+        if(!_auth.UserExists(user)) return BadRequest("User does not exists! Try to register first!");
 
-        Guid id = auth.Authenticate(user);
+        Guid id = _auth.Authenticate(user);
         if(id == Guid.Empty) return BadRequest("Incorrect password!");
 
         var token = _token.GenerateAccessToken(id);

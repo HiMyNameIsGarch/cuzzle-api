@@ -9,20 +9,20 @@ public class PuzzleController : ControllerBase
 {
     private readonly ILogger<PuzzleController> _logger;
     private readonly IUserService _userService;
-    private readonly PuzzleService ps;
+    private readonly IPuzzleService _ps;
 
-    public PuzzleController(ILogger<PuzzleController> logger, IUserService userService)
+    public PuzzleController(ILogger<PuzzleController> logger, IUserService user, IPuzzleService ps)
     {
-        ps = new PuzzleService();
+        _ps = ps;
         _logger = logger;
-        _userService = userService;
+        _userService = user;
     }
 
     [Authorize] // test purpose
     [HttpGet]
     public IActionResult GetAll()
     {
-        var puzzles = ps.GetPuzzleList();
+        var puzzles = _ps.GetPuzzleList();
 
         return Ok(puzzles);
     }
@@ -30,7 +30,7 @@ public class PuzzleController : ControllerBase
     [HttpGet("{id}")]
     public IActionResult GetById(Guid id)
     {
-        var puzzle = ps.GetPuzzle(id);
+        var puzzle = _ps.GetPuzzle(id);
         if(puzzle.Id == Guid.Empty) return BadRequest("We could not get puzzle");
 
         return Ok(puzzle);
@@ -42,7 +42,7 @@ public class PuzzleController : ControllerBase
         puzzleToAdd.Id = Guid.Empty;
         puzzleToAdd.SolutionId = Guid.Empty;
 
-        var puzzle = ps.AddPuzzle(puzzleToAdd);
+        var puzzle = _ps.AddPuzzle(puzzleToAdd);
         if(puzzle.Id == Guid.Empty) return BadRequest("We could not create puzzle");
 
         return Ok(puzzle);
@@ -51,7 +51,7 @@ public class PuzzleController : ControllerBase
     [HttpPut]
     public IActionResult Update([FromBody] PuzzleVM puzzleToUpdate)
     {
-        var updated = ps.UpdatePuzzle(puzzleToUpdate);
+        var updated = _ps.UpdatePuzzle(puzzleToUpdate);
         if(!updated) return BadRequest("We could not update puzzle");
 
         return Ok();
@@ -60,7 +60,7 @@ public class PuzzleController : ControllerBase
     [HttpDelete]
     public IActionResult Delete(Guid id)
     {
-        var deleted = ps.DeletePuzzle(id);
+        var deleted = _ps.DeletePuzzle(id);
         if(!deleted) return BadRequest("We could not delete puzzle!");
 
         return Ok();

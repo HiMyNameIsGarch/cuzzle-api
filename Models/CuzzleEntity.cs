@@ -2,13 +2,13 @@ using Npgsql;
 
 namespace cuzzle_api.Models;
 
-internal class CuzzleEntity
+public class CuzzleEntity: IDbService
 {
     private readonly NpgsqlConnection _connection;
 
     private const string CONNECTION_STRING = "Host=127.0.0.1;Username=cuzzle_user;Password=;Database=cuzzledb";
 
-    internal CuzzleEntity()
+    public CuzzleEntity()
     {
         _connection = new NpgsqlConnection(CONNECTION_STRING);
     }
@@ -58,7 +58,7 @@ internal class CuzzleEntity
         return obj;
     }
 
-    internal IEnumerable<T> GetListOfObjests<T>(NpgsqlCommand cmd) where T : class, new()
+    public IEnumerable<T> GetListOfObjests<T>(NpgsqlCommand cmd) where T : class, new()
     {
         cmd.Connection = _connection; // override connection
 
@@ -78,7 +78,7 @@ internal class CuzzleEntity
         return objects;
     }
 
-    internal bool ExecuteQuery(NpgsqlCommand cmd)
+    public bool ExecuteQuery(NpgsqlCommand cmd)
     {
         cmd.Connection = _connection;
 
