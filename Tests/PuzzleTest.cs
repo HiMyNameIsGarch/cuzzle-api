@@ -10,7 +10,7 @@ public class PuzzleTest
 {
     private readonly PuzzleVM puzzle = new PuzzleVM("Hard", "my puzzle", "a description");
 
-    private readonly PuzzleService ps = new PuzzleService(new CuzzleEntity());
+    private readonly IPuzzleService ps = new PuzzleService(new CuzzleEntity());
 
     [Fact]
     public void ShouldAddPuzzleAndDeleteIt()

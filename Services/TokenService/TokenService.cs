@@ -1,15 +1,15 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using cuzzle_api.Models.Helpers;
 
 namespace cuzzle_api.Services.TokenService;
 
 public class TokenService: ITokenService
 {
-    private const string security_algo = SecurityAlgorithms.HmacSha256;
+    private const string SECURITYALGO = SecurityAlgorithms.HmacSha256;
 
     private readonly IConfiguration _config;
 
@@ -21,6 +21,9 @@ public class TokenService: ITokenService
         _db = db;
     }
 
+    private SymmetricSecurityKey getIssuerSigningKey() => 
+        new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters
@@ -28,7 +31,7 @@ public class TokenService: ITokenService
             ValidateAudience = false,
             ValidateIssuer = false,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"])),
+            IssuerSigningKey = getIssuerSigningKey(),
             ValidateLifetime = false,
         };
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -36,7 +39,7 @@ public class TokenService: ITokenService
         var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
         var jwtSecurityToken = securityToken as JwtSecurityToken;
 
-        if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(security_algo, StringComparison.InvariantCultureIgnoreCase))
+        if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SECURITYALGO, StringComparison.InvariantCultureIgnoreCase))
             throw new SecurityTokenException("Invalid token");
 
         return principal;
@@ -49,10 +52,9 @@ public class TokenService: ITokenService
             new Claim(ClaimTypes.Sid, id.ToString())
         };
 
-        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                    _config.GetSection("Jwt:Key").Value));
+        var key = getIssuerSigningKey();
 
-        var cred = new SigningCredentials(key, security_algo);
+        var cred = new SigningCredentials(key, SECURITYALGO);
 
         var token = new JwtSecurityToken(
                 issuer: _config.GetSection("Jwt:Issuer").Value,
@@ -71,7 +73,7 @@ public class TokenService: ITokenService
         // gen refresh token
         var token = new RefreshToken
         {
-            Token = GetRandomToken(),
+            Token = TokenHelper.GetRandomToken(),
             Expires = DateTime.Now.AddDays(_config.GetValue<double>("Jwt:RefreshExpireTime")),
             Created = DateTime.Now
         };
@@ -86,35 +88,10 @@ public class TokenService: ITokenService
         cmd.CommandText = "UPDATE account SET refresh_token = @refresh_token, refresh_token_expire_date = @refresh_token_expire_date WHERE id = @id::UUID;";
         cmd.Parameters.AddWithValue("id", id);
 
-        byte[] hashedToken = HashToken(token.Token);
+        byte[] hashedToken = TokenHelper.HashToken(token.Token);
         cmd.Parameters.AddWithValue("refresh_token", hashedToken);
         cmd.Parameters.AddWithValue("refresh_token_expire_date", token.Expires);
 
         return _db.ExecuteQuery(cmd);
     }
-
-    // TODO: Move this function into a proper class
-    private byte[] HashToken(string token)
-    {
-        byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
-        byte[] hash = new byte[32];
-        using(SHA256 sha = SHA256.Create())
-        {
-            hash = sha.ComputeHash(tokenBytes);
-        }
-        return hash;
-    }
-
-    private string GetRandomToken()
-    {
-        string token = string.Empty;
-        var randomNumber = new byte[64];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(randomNumber);
-            token = Convert.ToBase64String(randomNumber);
-        }
-        return token;
-    }
-
 }

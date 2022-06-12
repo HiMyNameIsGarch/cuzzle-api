@@ -1,8 +1,6 @@
 using cuzzle_api.Models;
-using Microsoft.AspNetCore.Cryptography.KeyDerivation;
+using cuzzle_api.Models.Helpers;
 using Npgsql;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace cuzzle_api.Services.AuthService;
 
@@ -13,27 +11,6 @@ public class AuthService: IAuthService
     public AuthService(IDbService db)
     {
         _db = db;
-    }
-
-    private byte[] GenerateSalt()
-    {
-        byte[] salt = new byte[64];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(salt);
-        }
-        return salt;
-    }
-
-    private byte[] GeneratePasswordHash(string password, byte[] salt)
-    {
-        byte[] passwordHash = KeyDerivation.Pbkdf2(
-            password: password,
-            salt: salt,
-            prf: KeyDerivationPrf.HMACSHA512,
-            iterationCount: 50000,
-            numBytesRequested: 256);
-        return passwordHash;
     }
 
     public bool UserExists(UserLogin user)
@@ -53,9 +30,9 @@ public class AuthService: IAuthService
         cmd.Parameters.AddWithValue("username", register.UserName);
         cmd.Parameters.AddWithValue("email", register.Email);
         // Generate salt
-        byte[] salt = GenerateSalt();
+        byte[] salt = SecurityHelper.GenerateSalt();
         // Generate password with the salt
-        byte[] password = GeneratePasswordHash(register.Password, salt);
+        byte[] password = SecurityHelper.GeneratePasswordHash(register.Password, salt);
         // Store both
         cmd.Parameters.AddWithValue("password_hash", password);
         cmd.Parameters.AddWithValue("password_salt", salt);
@@ -71,38 +48,10 @@ public class AuthService: IAuthService
         cmd.Parameters.AddWithValue("email", user.Email);
 
         var result = _db.GetObject<UserDb>(cmd);
-        if(MatchPasswords(user.Password, result.PasswordHash, result.PasswordSalt))
+        if(SecurityHelper.MatchPasswords(user.Password, result.PasswordHash, result.PasswordSalt))
             return result.Id;
 
         return Guid.Empty;
-    }
-
-    private bool MatchPasswords(string password, byte[] passwordDb, byte[] saltDb)
-    {
-        byte[] pass = GeneratePasswordHash(password, saltDb);
-
-        return pass.SequenceEqual(passwordDb);
-    }
-
-    // TODO: Move this function into a proper class
-    private byte[] HashToken(string token)
-    {
-        byte[] tokenBytes = Encoding.UTF8.GetBytes(token);
-        byte[] hash = new byte[32];
-        using(SHA256 sha = SHA256.Create())
-        {
-            hash = sha.ComputeHash(tokenBytes);
-        }
-        return hash;
-    }
-
-    public bool CheckIfTokensMatch(string userToken, UserToken dbToken)
-    {
-        if(dbToken.RefreshTokenExpireDate < DateTime.Now) return false;
-
-        byte[] hashedToken = HashToken(userToken);
-
-        return hashedToken.SequenceEqual(dbToken.RefreshToken);
     }
 
     public UserToken GetUserToken(Guid id)
@@ -113,5 +62,14 @@ public class AuthService: IAuthService
 
         UserToken user = _db.GetObject<UserToken>(cmd);
         return user;
+    }
+
+    public bool CheckIfTokensMatch(string userToken, UserToken dbToken)
+    {
+        if(dbToken.RefreshTokenExpireDate < DateTime.Now) return false;
+
+        byte[] hashedToken = TokenHelper.HashToken(userToken);
+
+        return hashedToken.SequenceEqual(dbToken.RefreshToken);
     }
 }
