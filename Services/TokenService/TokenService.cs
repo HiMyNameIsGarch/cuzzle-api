@@ -4,6 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
 using cuzzle_api.Models.Helpers;
+using cuzzle_api.Models.Auth;
 
 namespace cuzzle_api.Services.TokenService;
 
@@ -21,7 +22,7 @@ public class TokenService: ITokenService
         _db = db;
     }
 
-    private SymmetricSecurityKey getIssuerSigningKey() => 
+    private SymmetricSecurityKey getIssuerSigningKey() =>
         new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
@@ -59,7 +60,7 @@ public class TokenService: ITokenService
         var token = new JwtSecurityToken(
                 issuer: _config.GetSection("Jwt:Issuer").Value,
                 audience: _config.GetSection("Jwt:Audience").Value,
-                claims: claims, 
+                claims: claims,
                 expires: DateTime.Now.AddMinutes(_config.GetValue<double>("Jwt:AccessExpireTime")),
                 signingCredentials: cred);
 
@@ -77,6 +78,7 @@ public class TokenService: ITokenService
             Expires = DateTime.Now.AddDays(_config.GetValue<double>("Jwt:RefreshExpireTime")),
             Created = DateTime.Now
         };
+
         // return it
         if(!AddTokenToDb(token, id)) return new RefreshToken();
         return token;

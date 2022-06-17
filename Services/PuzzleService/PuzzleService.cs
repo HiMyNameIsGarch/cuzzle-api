@@ -64,6 +64,5 @@ public class PuzzleService: IPuzzleService
 
         var deleted = _db.ExecuteQuery(cmd);
         return deleted;
-
     }
 }

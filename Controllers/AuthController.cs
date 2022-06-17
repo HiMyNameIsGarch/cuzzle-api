@@ -1,4 +1,4 @@
-using cuzzle_api.Models;
+using cuzzle_api.Models.Auth;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using cuzzle_api.Services.AuthService;
@@ -26,11 +26,11 @@ public class AuthController: ControllerBase
 
     [AllowAnonymous]
     [HttpPost("register")]
-    public IActionResult Register([FromBody] UserLogin userLogin)
+    public IActionResult Register([FromBody] UserRegister register)
     {
-        if(_auth.UserExists(userLogin)) return BadRequest("User already exists! Try loggin in instead!");
+        if(_auth.UserExists(register.Email)) return BadRequest("User already exists! Try loggin in instead!");
 
-        bool registered = _auth.Register(userLogin);
+        bool registered = _auth.Register(register);
         if(registered) return Ok();
         return BadRequest("We could not register the user.");
     }
@@ -39,7 +39,7 @@ public class AuthController: ControllerBase
     [HttpPost("login")]
     public IActionResult Login([FromBody] UserLogin user)
     {
-        if(!_auth.UserExists(user)) return BadRequest("User does not exists! Try to register first!");
+        if(!_auth.UserExists(user.Email)) return BadRequest("User does not exists! Try to register first!");
 
         Guid id = _auth.Authenticate(user);
         if(id == Guid.Empty) return BadRequest("Incorrect password!");
@@ -48,7 +48,7 @@ public class AuthController: ControllerBase
         var refreshToken = _token.GeneretateRefreshToken(id);
         if(string.IsNullOrEmpty(refreshToken.Token)) return BadRequest("We could not generate refresh token!");
 
-        var tokens = new AuthenticatedResponse()
+        var tokens = new AuthenticationResponse()
         {
             Token = token,
             RefreshToken = refreshToken.Token

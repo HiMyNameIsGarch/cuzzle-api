@@ -1,3 +1,5 @@
+namespace cuzzle_api.Models.Auth;
+
 public class RefreshToken
 {
     public string Token { get; set; } = string.Empty;

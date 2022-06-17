@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using cuzzle_api.Models.Auth;
 
 namespace cuzzle_api.Services.TokenService;
 

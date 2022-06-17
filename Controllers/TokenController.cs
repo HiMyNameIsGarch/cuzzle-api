@@ -1,7 +1,7 @@
 using cuzzle_api.Services.TokenService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using cuzzle_api.Models;
+using cuzzle_api.Models.Auth;
 using System.Security.Claims;
 using cuzzle_api.Services.AuthService;
 
@@ -24,12 +24,12 @@ public class TokenController: ControllerBase
 
     [AllowAnonymous]
     [HttpPost("refresh")]
-    public IActionResult Refresh([FromBody] AuthenticatedResponse model)
+    public IActionResult Refresh([FromBody] AuthenticationResponse model)
     {
         var principal = _tokenService.GetPrincipalFromExpiredToken(model.Token);
 
         string userId = principal.FindFirstValue(ClaimTypes.Sid);
-        if(!Guid.TryParse(userId, out Guid goodUserId)) 
+        if(!Guid.TryParse(userId, out Guid goodUserId))
             return Unauthorized("Invalid Sid claim!");
 
         // get user from db
@@ -43,6 +43,11 @@ public class TokenController: ControllerBase
         var newRefreshToken = _tokenService.GeneretateRefreshToken(goodUserId);
         if(string.IsNullOrEmpty(newRefreshToken.Token)) return BadRequest("We could not generate refresh token!");
 
-        return Ok(new AuthenticatedResponse(){ Token = token, RefreshToken = newRefreshToken.Token });
+        var response = new AuthenticationResponse()
+        {
+            Token = token,
+            RefreshToken = newRefreshToken.Token
+        };
+        return Ok(response);
     }
 }

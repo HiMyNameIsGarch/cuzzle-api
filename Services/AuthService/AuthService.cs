@@ -1,5 +1,6 @@
 using cuzzle_api.Models;
 using cuzzle_api.Models.Helpers;
+using cuzzle_api.Models.Auth;
 using Npgsql;
 
 namespace cuzzle_api.Services.AuthService;
@@ -13,17 +14,17 @@ public class AuthService: IAuthService
         _db = db;
     }
 
-    public bool UserExists(UserLogin user)
+    public bool UserExists(string email)
     {
         NpgsqlCommand cmd = new NpgsqlCommand();
         cmd.CommandText = "SELECT id FROM account WHERE email = @email;";
-        cmd.Parameters.AddWithValue("email", user.Email);
+        cmd.Parameters.AddWithValue("email", email);
 
         Guid id = _db.GetScalar<Guid>(cmd);
         return id != Guid.Empty;
     }
 
-    public bool Register(UserLogin register)
+    public bool Register(UserRegister register)
     {
         NpgsqlCommand cmd = new NpgsqlCommand();
         cmd.CommandText = "INSERT INTO account(username, email, password_hash, password_salt) VALUES(@username, @email, @password_hash, @password_salt) RETURNING id;";
@@ -36,7 +37,7 @@ public class AuthService: IAuthService
         // Store both
         cmd.Parameters.AddWithValue("password_hash", password);
         cmd.Parameters.AddWithValue("password_salt", salt);
-        
+
         // Execute query
         return _db.ExecuteQuery(cmd);
     }
