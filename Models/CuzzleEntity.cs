@@ -17,15 +17,17 @@ public class CuzzleEntity: IDbService
     {
         cmd.Connection = _connection;
         object? result = null;
-        try 
+        try
         {
             cmd.Connection.Open();
             result = cmd.ExecuteScalar();
         }
         catch(Exception ex)
         {
+            cmd.Connection.Close();
             Console.WriteLine("We could not execute the query.");
             Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.StackTrace);
         }
         cmd.Connection.Close();
 
@@ -38,15 +40,16 @@ public class CuzzleEntity: IDbService
         cmd.Connection = _connection;
 
         NpgsqlDataReader? dr = null;
-        try 
+        try
         {
             cmd.Connection.Open();
             dr = cmd.ExecuteReader();
         }
         catch(Exception ex)
         {
+            cmd.Connection.Close();
             Console.WriteLine("We could not get a " + new T().ToString());
-            // Log full exception 
+            // Log full exception
             // raise exception to capture the filter to show to the user
             Console.WriteLine(ex.Message);
         }
@@ -63,13 +66,14 @@ public class CuzzleEntity: IDbService
         cmd.Connection = _connection; // override connection
 
         NpgsqlDataReader? dr = null;
-        try 
+        try
         {
             cmd.Connection.Open();
             dr = cmd.ExecuteReader();
         }
         catch(Exception ex)
         {
+            cmd.Connection.Close();
             Console.WriteLine("We could not get the list of " + new T().ToString());
             Console.WriteLine(ex.Message);
         }
@@ -83,15 +87,17 @@ public class CuzzleEntity: IDbService
         cmd.Connection = _connection;
 
         int numRows = 0;
-        try 
+        try
         {
             cmd.Connection.Open();
             numRows = cmd.ExecuteNonQuery();
         }
         catch(Exception ex)
         {
+            cmd.Connection.Close();
             Console.WriteLine("We could not execute query");
             Console.WriteLine(ex.Message);
+            Console.WriteLine(ex.StackTrace);
             return false;
         }
         cmd.Connection.Close();

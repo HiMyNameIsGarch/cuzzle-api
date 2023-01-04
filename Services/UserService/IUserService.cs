@@ -1,4 +1,4 @@
 public interface IUserService
 {
-    string GetId();
+    Guid GetId();
 }

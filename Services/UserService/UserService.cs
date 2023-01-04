@@ -11,13 +11,14 @@ public class UserService : IUserService
         _httpContextAccessor = httpContextAccessor;
     }
 
-    public string GetId()
+    public Guid GetId()
     {
-        string result = string.Empty;
+        string tmp = string.Empty;
         if(_httpContextAccessor.HttpContext is not null)
         {
-            result = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Sid);
+            tmp = _httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.Sid);
         }
+        Guid result = new Guid(tmp);
         return result;
     }
 }

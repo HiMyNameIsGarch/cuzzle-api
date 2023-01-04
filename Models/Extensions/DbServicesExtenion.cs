@@ -2,6 +2,7 @@ using cuzzle_api.Services.TokenService;
 using cuzzle_api.Services.AuthService;
 using cuzzle_api.Services.PuzzleService;
 using cuzzle_api.Models;
+using cuzzle_api.Services.ProfileService;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -18,7 +19,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             // Models
             services.AddSingleton<IPuzzleService, PuzzleService>();
-            
+            services.AddSingleton<IProfileService, ProfileService>();
+
             // Http
             services.AddHttpContextAccessor();
             return services;

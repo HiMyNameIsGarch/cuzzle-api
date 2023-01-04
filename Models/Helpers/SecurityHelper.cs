@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace cuzzle_api.Models.Helpers;
 
-public static class SecurityHelper 
+public static class SecurityHelper
 {
     private const int SALTBYTES = 64;
     private const int ITERATIONS = 50000;
